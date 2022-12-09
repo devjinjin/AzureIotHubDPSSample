@@ -29,12 +29,14 @@
         private void InitializeComponent()
         {
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.primaryKeySaveButton = new System.Windows.Forms.Button();
             this.firstRegistrationTextBox = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.firstPrimaryKeyTextBot = new System.Windows.Forms.TextBox();
             this.GenerateDeviceKeyButton = new System.Windows.Forms.Button();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.scopeIdButton = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
             this.privateKeyTextBox = new System.Windows.Forms.TextBox();
             this.registrationIdTextBox = new System.Windows.Forms.TextBox();
@@ -46,8 +48,6 @@
             this.iotHubUrlTextBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.primaryKeySaveButton = new System.Windows.Forms.Button();
-            this.scopeIdButton = new System.Windows.Forms.Button();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -68,13 +68,23 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "디바이스키 관리";
             // 
+            // primaryKeySaveButton
+            // 
+            this.primaryKeySaveButton.Location = new System.Drawing.Point(480, 25);
+            this.primaryKeySaveButton.Name = "primaryKeySaveButton";
+            this.primaryKeySaveButton.Size = new System.Drawing.Size(63, 29);
+            this.primaryKeySaveButton.TabIndex = 5;
+            this.primaryKeySaveButton.Text = "저장";
+            this.primaryKeySaveButton.UseVisualStyleBackColor = true;
+            this.primaryKeySaveButton.Click += new System.EventHandler(this.primaryKeySaveButton_Click);
+            // 
             // firstRegistrationTextBox
             // 
             this.firstRegistrationTextBox.Location = new System.Drawing.Point(109, 59);
             this.firstRegistrationTextBox.Name = "firstRegistrationTextBox";
             this.firstRegistrationTextBox.Size = new System.Drawing.Size(434, 27);
             this.firstRegistrationTextBox.TabIndex = 4;
-            this.firstRegistrationTextBox.TextChanged += new System.EventHandler(this.firstRegistrationTextBox_TextChanged);
+            this.firstRegistrationTextBox.TextChanged += new System.EventHandler(this.deviceKeyGroupTextChanged);
             // 
             // label6
             // 
@@ -100,6 +110,7 @@
             this.firstPrimaryKeyTextBot.Name = "firstPrimaryKeyTextBot";
             this.firstPrimaryKeyTextBot.Size = new System.Drawing.Size(365, 27);
             this.firstPrimaryKeyTextBot.TabIndex = 1;
+            this.firstPrimaryKeyTextBot.TextChanged += new System.EventHandler(this.deviceKeyGroupTextChanged);
             // 
             // GenerateDeviceKeyButton
             // 
@@ -128,6 +139,16 @@
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "디바이스 관리";
             // 
+            // scopeIdButton
+            // 
+            this.scopeIdButton.Location = new System.Drawing.Point(477, 56);
+            this.scopeIdButton.Name = "scopeIdButton";
+            this.scopeIdButton.Size = new System.Drawing.Size(63, 29);
+            this.scopeIdButton.TabIndex = 18;
+            this.scopeIdButton.Text = "저장";
+            this.scopeIdButton.UseVisualStyleBackColor = true;
+            this.scopeIdButton.Click += new System.EventHandler(this.scopeIdButton_Click);
+            // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(6, 214);
@@ -144,6 +165,7 @@
             this.privateKeyTextBox.Name = "privateKeyTextBox";
             this.privateKeyTextBox.Size = new System.Drawing.Size(534, 27);
             this.privateKeyTextBox.TabIndex = 16;
+            this.privateKeyTextBox.TextChanged += new System.EventHandler(this.deviceManageGroupTextChanged);
             // 
             // registrationIdTextBox
             // 
@@ -151,6 +173,7 @@
             this.registrationIdTextBox.Name = "registrationIdTextBox";
             this.registrationIdTextBox.Size = new System.Drawing.Size(534, 27);
             this.registrationIdTextBox.TabIndex = 15;
+            this.registrationIdTextBox.TextChanged += new System.EventHandler(this.deviceManageGroupTextChanged);
             // 
             // scopeTextBox
             // 
@@ -158,6 +181,7 @@
             this.scopeTextBox.Name = "scopeTextBox";
             this.scopeTextBox.Size = new System.Drawing.Size(465, 27);
             this.scopeTextBox.TabIndex = 14;
+            this.scopeTextBox.TextChanged += new System.EventHandler(this.deviceManageGroupTextChanged);
             // 
             // label4
             // 
@@ -224,26 +248,6 @@
             this.groupBox1.TabIndex = 16;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "메세지 전송";
-            // 
-            // primaryKeySaveButton
-            // 
-            this.primaryKeySaveButton.Location = new System.Drawing.Point(480, 25);
-            this.primaryKeySaveButton.Name = "primaryKeySaveButton";
-            this.primaryKeySaveButton.Size = new System.Drawing.Size(63, 29);
-            this.primaryKeySaveButton.TabIndex = 5;
-            this.primaryKeySaveButton.Text = "저장";
-            this.primaryKeySaveButton.UseVisualStyleBackColor = true;
-            this.primaryKeySaveButton.Click += new System.EventHandler(this.primaryKeySaveButton_Click);
-            // 
-            // scopeIdButton
-            // 
-            this.scopeIdButton.Location = new System.Drawing.Point(477, 56);
-            this.scopeIdButton.Name = "scopeIdButton";
-            this.scopeIdButton.Size = new System.Drawing.Size(63, 29);
-            this.scopeIdButton.TabIndex = 18;
-            this.scopeIdButton.Text = "저장";
-            this.scopeIdButton.UseVisualStyleBackColor = true;
-            this.scopeIdButton.Click += new System.EventHandler(this.scopeIdButton_Click);
             // 
             // Form1
             // 

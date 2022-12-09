@@ -281,9 +281,10 @@ namespace AimsIotHubRegApp
             }
         }
 
-        private void firstRegistrationTextBox_TextChanged(object sender, EventArgs e)
+        private void deviceKeyGroupTextChanged(object sender, EventArgs e)
         {
-            if (firstRegistrationTextBox.Text.Length > 0)
+            if (firstRegistrationTextBox.Text.Length > 0
+                && firstPrimaryKeyTextBot.Text.Length > 0)
             {
                 GenerateDeviceKeyButton.Enabled = true;
             }
@@ -291,6 +292,22 @@ namespace AimsIotHubRegApp
             {
                 GenerateDeviceKeyButton.Enabled = false;
             }
+
+        }
+
+        private void deviceManageGroupTextChanged(object sender, EventArgs e)
+        {
+            if (scopeTextBox.Text.Length > 0
+                && privateKeyTextBox.Text.Length > 0
+                && registrationIdTextBox.Text.Length > 0)
+            {
+                button1.Enabled = true;
+            }
+            else
+            {
+                button1.Enabled = false;
+            }
+
         }
 
         private void primaryKeySaveButton_Click(object sender, EventArgs e)
