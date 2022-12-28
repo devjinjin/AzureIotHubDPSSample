@@ -20,21 +20,112 @@ namespace AimsIotHubRegApp
             var primaryKey = Properties.Settings.Default.primaryKey;
             var scopeId = Properties.Settings.Default.scopeId;
 
-            firstPrimaryKeyTextBot.Text = primaryKey;
             scopeTextBox.Text = scopeId;
-
-            button1.Enabled = false;
             messageSendButton.Enabled = false;
-            GenerateDeviceKeyButton.Enabled = false;
+            DeviceRegistRequestButton.Enabled = false;
+            messageSendButton.Enabled = false;
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+
+        private ProvisioningTransportHandler GetTransportHandler()
         {
-            if (IsValidInputValue())
+            return _parameters.TransportType switch
+            {
+                TransportType.Mqtt => new ProvisioningTransportHandlerMqtt(),
+                TransportType.Mqtt_Tcp_Only => new ProvisioningTransportHandlerMqtt(TransportFallbackType.TcpOnly),
+                TransportType.Mqtt_WebSocket_Only => new ProvisioningTransportHandlerMqtt(TransportFallbackType.WebSocketOnly),
+                TransportType.Amqp => new ProvisioningTransportHandlerAmqp(),
+                TransportType.Amqp_Tcp_Only => new ProvisioningTransportHandlerAmqp(TransportFallbackType.TcpOnly),
+                TransportType.Amqp_WebSocket_Only => new ProvisioningTransportHandlerAmqp(TransportFallbackType.WebSocketOnly),
+                TransportType.Http1 => new ProvisioningTransportHandlerHttp(),
+                _ => throw new NotSupportedException($"Unsupported transport type {_parameters.TransportType}"),
+            };
+        }
+
+
+        //********************************[ start VCU 아이디 변환  ]******************************************
+        /// <summary>
+        /// VCU 아이디를 통한 대칭키 생성
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SymmetricKeyGeneratedButton_Click(object sender, EventArgs e)
+        {
+            if (VcuIdTextBox.Text == String.Empty)
+            {
+                MessageBox.Show(this, "VCU 아이디를 먼저 입력해주세요.");
+            }
+            else
+            {
+                RunConvertHMACSHA256ForVCUIDAsync(VcuIdTextBox.Text);
+            }
+        }
+
+        /// <summary>
+        /// VCU 아이디 sha256 변환
+        /// </summary>
+        /// <param name="vcuIdText"></param>
+        public void RunConvertHMACSHA256ForVCUIDAsync(string vcuIdText)
+        {
+            using SHA256 sha = new SHA256Managed();
+            byte[] hash = sha.ComputeHash(Encoding.ASCII.GetBytes(vcuIdText));
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (byte b in hash)
+            {
+                stringBuilder.AppendFormat("{0:x2}", b);
+            }
+            var encryptString = stringBuilder.ToString();
+
+            if (encryptString != null && encryptString.Length > 0)
+            {
+                SymmetricKeyResultTextBox.Text = encryptString;
+                SymmetricKeyTextBox.Text = encryptString;
+            }
+            MessageBox.Show(this, encryptString);
+        }
+        //********************************[ End VCU 아이디 변환  ]******************************************
+
+        //********************************[ start 디바이스 관리 ]******************************************
+        private void scopeIdButton_Click(object sender, EventArgs e)
+        {
+            if (scopeTextBox.Text.Length > 0)
+            {
+                Properties.Settings.Default.scopeId = scopeTextBox.Text;
+                Properties.Settings.Default.Save();
+
+                MessageBox.Show("ID 범위 저장 완료");
+            }
+        }
+
+        private void RegistrationIdTextBox_TextChanged(object sender, EventArgs e)
+        {
+            DeviceRegistRequestButton.Enabled = IsValidInputDeviceRegistrationValue();
+            messageSendButton.Enabled = IsValidInputMessageValue();
+        }
+
+        private void scopeTextBox_TextChanged(object sender, EventArgs e)
+        {
+            DeviceRegistRequestButton.Enabled = IsValidInputDeviceRegistrationValue();
+            messageSendButton.Enabled = IsValidInputMessageValue();
+        }
+        private void SymmetricKeyTextBox_TextChanged(object sender, EventArgs e)
+        {
+            DeviceRegistRequestButton.Enabled = IsValidInputDeviceRegistrationValue();
+            messageSendButton.Enabled = IsValidInputMessageValue();
+        }
+
+
+        private async void DeviceRegistRequestButton_Click(object sender, EventArgs e)
+        {
+            await DeviceRegistrationAsync();
+        }
+
+        private async Task DeviceRegistrationAsync() {
+            if (IsValidInputDeviceRegistrationValue())
             {
                 _parameters.IdScope = scopeTextBox.Text;
-                _parameters.RegistrationId = registrationIdTextBox.Text;
-                _parameters.PrimaryKey = privateKeyTextBox.Text;
+                _parameters.RegistrationId = RegistrationIdTextBox.Text;
+                _parameters.PrimaryKey = SymmetricKeyResultTextBox.Text;
 
                 try
                 {
@@ -42,13 +133,15 @@ namespace AimsIotHubRegApp
 
                     if (result.Item1)
                     {
-                        MessageBox.Show(this,"등록이 완료되었습니다");
+                        MessageBox.Show(this, "등록이 완료되었습니다");
                     }
-                    else {
+                    else
+                    {
                         MessageBox.Show(this, "등록이 실패 하였습니다");
                     }
 
-                    if (result.Item2.Length > 0) {
+                    if (result.Item2.Length > 0)
+                    {
                         iotHubUrlTextBox.Text = result.Item2;
                     }
                 }
@@ -64,32 +157,15 @@ namespace AimsIotHubRegApp
                 MessageBox.Show(this, "입력되지않는 값이 있습니다.");
             }
         }
-
-
-        private bool IsValidInputValue()
+        private bool IsValidInputDeviceRegistrationValue()
         {
             if (scopeTextBox.Text == String.Empty
-                || registrationIdTextBox.Text == String.Empty
-                || privateKeyTextBox.Text == String.Empty)
+                || RegistrationIdTextBox.Text == String.Empty
+                || SymmetricKeyTextBox.Text == String.Empty)
             {
                 return false;
             }
             return true;
-        }
-
-        private ProvisioningTransportHandler GetTransportHandler()
-        {
-            return _parameters.TransportType switch
-            {
-                TransportType.Mqtt => new ProvisioningTransportHandlerMqtt(),
-                TransportType.Mqtt_Tcp_Only => new ProvisioningTransportHandlerMqtt(TransportFallbackType.TcpOnly),
-                TransportType.Mqtt_WebSocket_Only => new ProvisioningTransportHandlerMqtt(TransportFallbackType.WebSocketOnly),
-                TransportType.Amqp => new ProvisioningTransportHandlerAmqp(),
-                TransportType.Amqp_Tcp_Only => new ProvisioningTransportHandlerAmqp(TransportFallbackType.TcpOnly),
-                TransportType.Amqp_WebSocket_Only => new ProvisioningTransportHandlerAmqp(TransportFallbackType.WebSocketOnly),
-                TransportType.Http1 => new ProvisioningTransportHandlerHttp(),
-                _ => throw new NotSupportedException($"Unsupported transport type {_parameters.TransportType}"),
-            };
         }
 
         public async Task<(bool, string)> RunRegistrationAsync()
@@ -176,55 +252,13 @@ namespace AimsIotHubRegApp
 
         }
 
-        private void GenerateDeviceKeyButton_Click(object sender, EventArgs e)
+        //********************************[ End 디바이스 관리 ]******************************************
+
+        //********************************[ start 메세지 전송부  ]******************************************
+
+
+        private async Task<bool> SendMessage(string _deviceId, string _deviceKey, string _IotHubUri)
         {
-            if (firstPrimaryKeyTextBot.Text == String.Empty
-            || firstRegistrationTextBox.Text == String.Empty)
-            {
-                MessageBox.Show(this, "입력되지않은 값이 있습니다.");
-            }
-            else {
-                RunConvertHMACSHA256Async(firstPrimaryKeyTextBot.Text, firstRegistrationTextBox.Text);
-            }
-
-        }
-
-        public void RunConvertHMACSHA256Async(string primaryKey, string RegId)
-        {
-            using (HMACSHA256 hash = new HMACSHA256()) {
-                byte[] byte64 = Convert.FromBase64String(primaryKey);
-                hash.Key = byte64;
-                byte[] regIdByte = ASCIIEncoding.ASCII.GetBytes(RegId);
-                var sig = hash.ComputeHash(regIdByte);
-                var derivedkey = Convert.ToBase64String(sig);
-                Console.WriteLine(derivedkey);
-
-                if (derivedkey != null && derivedkey.Length > 0) { 
-                    privateKeyTextBox.Text = derivedkey;
-                    registrationIdTextBox.Text = RegId;
-                    button1.Enabled = true;
-                }
-                MessageBox.Show(this, derivedkey);
-            }
-        }
-
-        private async void button2_Click(object sender, EventArgs e)
-        {
-            //데이터 전송하기
-            if (registrationIdTextBox.Text != String.Empty 
-                || privateKeyTextBox.Text != String.Empty
-                || iotHubUrlTextBox.Text != String.Empty) {
-                var deviceId = registrationIdTextBox.Text;
-                var deviceKey = privateKeyTextBox.Text;
-                var IotHubUri = iotHubUrlTextBox.Text;
-
-                if (await SendMessage(deviceId, deviceKey, IotHubUri)) { 
-                    MessageBox.Show(this, "메세지 전송완료");
-                }
-            }
-        }
-
-        private async Task<bool> SendMessage(string _deviceId, string _deviceKey, string _IotHubUri) {
 
             var random = new Random();
             var _temperature = (float)(30.0 + random.NextDouble() * 5.0);
@@ -254,6 +288,7 @@ namespace AimsIotHubRegApp
 
             try
             {
+
                 var _deviceClient = DeviceClient.Create(_IotHubUri, new DeviceAuthenticationWithRegistrySymmetricKey(_deviceId, _deviceKey), TransportType.Mqtt);
 
                 await _deviceClient.SendEventAsync(message);
@@ -263,72 +298,51 @@ namespace AimsIotHubRegApp
                 return true;
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
 
                 return false;
             }
         }
 
+        private bool IsValidInputMessageValue()
+        {
+            if (RegistrationIdTextBox.Text.Length > 0
+                 && SymmetricKeyTextBox.Text.Length > 0
+                 && iotHubUrlTextBox.Text.Length > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
         private void iotHubUrlTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (iotHubUrlTextBox.Text.Length > 0)
-            {
-                messageSendButton.Enabled = true;
-            }
-            else {
-                messageSendButton.Enabled = false;
-            }
+            messageSendButton.Enabled = IsValidInputMessageValue();
         }
 
-        private void deviceKeyGroupTextChanged(object sender, EventArgs e)
+        private async void messageSendButton_ClickAsync(object sender, EventArgs e)
         {
-            if (firstRegistrationTextBox.Text.Length > 0
-                && firstPrimaryKeyTextBot.Text.Length > 0)
+
+            if (RegistrationIdTextBox.Text != String.Empty
+                || SymmetricKeyTextBox.Text != String.Empty
+                || iotHubUrlTextBox.Text != String.Empty)
             {
-                GenerateDeviceKeyButton.Enabled = true;
-            }
-            else
-            {
-                GenerateDeviceKeyButton.Enabled = false;
-            }
+                var deviceId = RegistrationIdTextBox.Text;
+                var deviceKey = SymmetricKeyTextBox.Text;
+                var IotHubUri = iotHubUrlTextBox.Text;
 
-        }
-
-        private void deviceManageGroupTextChanged(object sender, EventArgs e)
-        {
-            if (scopeTextBox.Text.Length > 0
-                && privateKeyTextBox.Text.Length > 0
-                && registrationIdTextBox.Text.Length > 0)
-            {
-                button1.Enabled = true;
-            }
-            else
-            {
-                button1.Enabled = false;
-            }
-
-        }
-
-        private void primaryKeySaveButton_Click(object sender, EventArgs e)
-        {
-            if (firstPrimaryKeyTextBot.Text.Length > 0)
-            {
-                Properties.Settings.Default.primaryKey = firstPrimaryKeyTextBot.Text;
-                Properties.Settings.Default.Save();
-                
-                MessageBox.Show("기본키 저장 완료");
-            }
-
-        }
-
-        private void scopeIdButton_Click(object sender, EventArgs e)
-        {
-            if (scopeTextBox.Text.Length > 0) {
-                Properties.Settings.Default.scopeId = scopeTextBox.Text;
-                Properties.Settings.Default.Save();
-
-                MessageBox.Show("ID 범위 저장 완료");
+                if (await SendMessage(deviceId, deviceKey, IotHubUri))
+                {
+                    MessageBox.Show(this, "메세지 전송완료");
+                }
+                else
+                {
+                    MessageBox.Show(this, "메세지 전송실패");
+                }
             }
         }
     }
