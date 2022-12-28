@@ -11,9 +11,11 @@
 5. 메세지 라우팅을 통해 연결된 값 확인
 
 # [선행 조건]
-## azure iot hub 등록
-## azure iot hub dsp 등록
-## azure 스토리지 계정 등록
-## azure iot hub 메세지 라우팅 등록
+```
+azure iot hub 등록
+azure iot hub dsp 등록
+azure 스토리지 계정 등록
+azure iot hub 메세지 라우팅 등록
+```
 
 
