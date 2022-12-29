@@ -78,10 +78,11 @@ namespace AimsIotHubRegApp
 
             if (encryptString != null && encryptString.Length > 0)
             {
-                SymmetricKeyResultTextBox.Text = encryptString;
-                SymmetricKeyTextBox.Text = encryptString;
+                SymmetricKeyResultTextBox.Text = encryptString.ToUpper();
+                SymmetricKeyTextBox.Text = encryptString.ToUpper();
+                MessageBox.Show(this, encryptString.ToUpper());
             }
-            MessageBox.Show(this, encryptString);
+       
         }
         //********************************[ End VCU 아이디 변환  ]******************************************
 
